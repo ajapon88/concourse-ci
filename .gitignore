@@ -1,0 +1,5 @@
+/bin/
+/database/
+/keys/web
+/keys/worker
+.env
