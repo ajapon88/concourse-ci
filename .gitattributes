@@ -1,0 +1,6 @@
+*.sh eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+.envrc eol=lf
+Dockerfile eol=lf
+keys/generate eol=lf
