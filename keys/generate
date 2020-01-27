@@ -6,21 +6,30 @@ cd $(dirname $0)
 
 CONCOURSE_IMAGE=concourse/concourse
 
-if [ ! -e ./web/session_signing_key ]; then
+if [ "$(expr substr $(uname -s) 1 5 2>/dev/null)" == 'MINGW' -o "$(expr substr $(uname -s) 1 7 2>/dev/null)" == 'MSYS_NT' ]; then
+  export MSYS_NO_PATHCONV=1
+  keys_path=$(pwd)
+  mount_keys_path=/${keys_path}
+else
+  keys_path=$(pwd)
+  mount_keys_path=${keys_path}
+fi
+
+if [ ! -e "${keys_path}/web/session_signing_key" ]; then
   echo "generate session_signing_key"
-  docker run --rm -v "${PWD}/web:/keys" "${CONCOURSE_IMAGE}" \
+  docker run --rm -v "${mount_keys_path}/web:/keys" "${CONCOURSE_IMAGE}" \
     generate-key -t rsa -f /keys/session_signing_key
 fi
 
-if [ ! -e ./web/tsa_host_key ]; then
+if [ ! -e "${keys_path}/web/tsa_host_key" ]; then
   echo "generate tsa_host_key"
-  docker run --rm -v "${PWD}/web:/keys" "${CONCOURSE_IMAGE}" \
+  docker run --rm -v "${mount_keys_path}/web:/keys" "${CONCOURSE_IMAGE}" \
     generate-key -t ssh -f /keys/tsa_host_key
 fi
 
-if [ ! -e ./worker/worker_key ]; then
+if [ ! -e "${keys_path}/worker/worker_key" ]; then
   echo "generate worker_key"
-  docker run --rm -v "${PWD}/worker:/keys" "${CONCOURSE_IMAGE}" \
+  docker run --rm -v "${mount_keys_path}/worker:/keys" "${CONCOURSE_IMAGE}" \
     generate-key -t ssh -f /keys/worker_key
 fi
 
