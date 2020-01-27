@@ -12,8 +12,4 @@ if [ ! -e .envrc ]; then
   cp .envrc.example .envrc
 fi
 
-if [ ! -e ./bin ]; then
-  mkdir ./bin
-fi
-
 ./keys/generate

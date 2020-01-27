@@ -15,23 +15,29 @@ else
   mount_keys_path=${keys_path}
 fi
 
+generate-key() {
+  local keytype=$1
+  local output=$2
+  local keyname=$3
+  docker run --rm -v "${mount_keys_path}/${output}:/keys" "${CONCOURSE_IMAGE}" \
+    generate-key -t "${keytype}" -f "/keys/${keyname}"
+}
+
 if [ ! -e "${keys_path}/web/session_signing_key" ]; then
   echo "generate session_signing_key"
-  docker run --rm -v "${mount_keys_path}/web:/keys" "${CONCOURSE_IMAGE}" \
-    generate-key -t rsa -f /keys/session_signing_key
+  generate-key rsa web session_signing_key
 fi
 
 if [ ! -e "${keys_path}/web/tsa_host_key" ]; then
   echo "generate tsa_host_key"
-  docker run --rm -v "${mount_keys_path}/web:/keys" "${CONCOURSE_IMAGE}" \
-    generate-key -t ssh -f /keys/tsa_host_key
+  generate-key ssh web tsa_host_key
 fi
 
 if [ ! -e "${keys_path}/worker/worker_key" ]; then
   echo "generate worker_key"
-  docker run --rm -v "${mount_keys_path}/worker:/keys" "${CONCOURSE_IMAGE}" \
-    generate-key -t ssh -f /keys/worker_key
+  generate-key ssh worker worker_key
 fi
 
-cp ./worker/worker_key.pub ./web/authorized_worker_keys
-cp ./web/tsa_host_key.pub ./worker
+rm -f "${keys_path}/web/authorized_worker_keys"
+cat "${keys_path}/worker/worker_key.pub" >>"${keys_path}/web/authorized_worker_keys"
+cp "${keys_path}/web/tsa_host_key.pub" "${keys_path}/worker"
