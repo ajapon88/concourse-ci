@@ -55,10 +55,25 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Concource CI
-/bin/
-/database/
-/keys/web
-/keys/worker
+
+### Concource CI
+
+# local binary
+bin/*
+!bin/.gitkeep
+
+# environments
 .env
 .envrc
+
+# keys
+keys/web/authorized_worker_keys
+keys/web/session_signing_key
+keys/web/tsa_host_key
+keys/web/tsa_host_key.pub
+keys/worker/worker_key
+keys/worker/worker_key.pub
+keys/worker/tsa_host_key.pub
+
+# volumes
+/database/
