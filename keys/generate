@@ -4,16 +4,25 @@ set -e -u
 
 cd $(dirname $0)
 
-IMAGE=concourse/concourse 
+CONCOURSE_IMAGE=concourse/concourse
 
-docker run --rm -v "${PWD}/web:/keys" "${IMAGE}" \
-  generate-key -t rsa -f /keys/session_signing_key
+if [ ! -e ./web/session_signing_key ]; then
+  echo "generate session_signing_key"
+  docker run --rm -v "${PWD}/web:/keys" "${CONCOURSE_IMAGE}" \
+    generate-key -t rsa -f /keys/session_signing_key
+fi
 
-docker run --rm -v "${PWD}/web:/keys" "${IMAGE}" \
-  generate-key -t ssh -f /keys/tsa_host_key
+if [ ! -e ./web/tsa_host_key ]; then
+  echo "generate tsa_host_key"
+  docker run --rm -v "${PWD}/web:/keys" "${CONCOURSE_IMAGE}" \
+    generate-key -t ssh -f /keys/tsa_host_key
+fi
 
-docker run --rm -v "${PWD}/worker:/keys" "${IMAGE}" \
-  generate-key -t ssh -f /keys/worker_key
+if [ ! -e ./worker/worker_key ]; then
+  echo "generate worker_key"
+  docker run --rm -v "${PWD}/worker:/keys" "${CONCOURSE_IMAGE}" \
+    generate-key -t ssh -f /keys/worker_key
+fi
 
 cp ./worker/worker_key.pub ./web/authorized_worker_keys
 cp ./web/tsa_host_key.pub ./worker
