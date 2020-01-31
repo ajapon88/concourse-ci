@@ -3,7 +3,8 @@ version: '3'
 services:
   concourse-db:
     image: postgres:12.1
-    volumes: ["./database:/database"]
+    volumes:
+      - ./volumes/database:/database
     environment:
       POSTGRES_DB: ${CONCOURSE_POSTGRES_DATABASE}
       POSTGRES_USER: ${CONCOURSE_POSTGRES_USER}
@@ -13,9 +14,13 @@ services:
   concourse-web:
     image: concourse/concourse:5.8.0
     command: web
-    depends_on: [concourse-db]
-    ports: ["8080:8080", "2222:2222"]
-    volumes: ["./keys/web:/concourse-keys"]
+    depends_on:
+      - concourse-db
+    ports:
+      - 8080:8080
+      - 2222:2222
+    volumes:
+      - ./keys/web:/concourse-keys
     restart: unless-stopped
     environment:
       CONCOURSE_POSTGRES_HOST: concourse-db
@@ -31,8 +36,10 @@ services:
     image: concourse/concourse:5.8.0
     command: worker
     privileged: true
-    depends_on: [concourse-web]
-    volumes: ["./keys/worker:/concourse-keys"]
+    depends_on:
+      - concourse-web
+    volumes:
+      - ./keys/worker:/concourse-keys
     environment:
       CONCOURSE_TSA_HOST: concourse-web:2222
       CONCOURSE_NAME: concourse-worker

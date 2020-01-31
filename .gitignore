@@ -76,4 +76,4 @@ keys/worker/worker_key.pub
 keys/worker/tsa_host_key.pub
 
 # volumes
-/database/
+/volumes/
