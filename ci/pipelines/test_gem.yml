@@ -1,0 +1,35 @@
+resources:
+- name: test_gem
+  type: git
+  source:
+    uri: https://github.com/ajapon88/test_gem.git
+    branch: master
+
+jobs:
+- name: spec
+  public: true
+  plan:
+  - get: test_gem
+    params:
+      depth: 1
+  - task: spec
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: ruby
+          tag: 2.7
+      inputs:
+      - name: test_gem
+      caches:
+      - path: test_gem/vendor/bundle
+      run:
+        path: sh
+        args:
+        - -xc
+        - |
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+          bundle exec rake spec
+        dir: test_gem
