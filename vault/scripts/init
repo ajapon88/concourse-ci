@@ -1,5 +1,7 @@
 #!/bin/sh -eu
 
+apk add --no-cache -f -q jq
+
 cd $(dirname ${0})
 
 echo "> vault login"
@@ -9,6 +11,7 @@ echo "> vault policy write concourse"
 cat <<EOF | vault policy write concourse -
 path "concourse/*" {
   policy = "read"
+  capabilities =  ["read", "list"]
 }
 EOF
 
@@ -17,5 +20,8 @@ vault secrets enable -version=1 -path=concourse kv
 
 if [ -e ./secrets.json ]; then
   echo "> vault write from secrets.json"
-  vault write concourse/main @secrets.json
+  json=$(cat secrets.json)
+  for key in $(echo $json | jq -r keys[]); do
+    vault write "concourse/main/${key}" value="$(echo $json | jq -r ".[\"$key\"]")"
+  done
 fi
