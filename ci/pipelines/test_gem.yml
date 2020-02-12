@@ -1,35 +1,80 @@
 resources:
-- name: test_gem
-  type: git
-  source:
-    uri: https://github.com/ajapon88/test_gem.git
-    branch: master
+  - name: test_gem
+    type: git
+    source:
+      uri: https://github.com/ajapon88/test_gem.git
+      branch: master
+  - name: artifacts
+    type: s3
+    source:
+      endpoint: http://minio:9000
+      disable_ssl: true
+      region_name: ap-northeast-1
+      access_key_id: ((minio-access-key))
+      secret_access_key: ((minio-secret-key))
+      bucket: artifacts
+      regexp: test_gem/test_gem-(.*).gem
 
 jobs:
-- name: spec
-  public: true
-  plan:
-  - get: test_gem
-    params:
-      depth: 1
-  - task: spec
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: ruby
-          tag: 2.7
-      inputs:
-      - name: test_gem
-      caches:
-      - path: test_gem/vendor/bundle
-      run:
-        path: sh
-        args:
-        - -xc
-        - |
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
-          bundle exec rake spec
-        dir: test_gem
+  - name: spec
+    public: true
+    plan:
+      - get: test_gem
+        params:
+          depth: 1
+      - task: spec
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ruby
+              tag: 2.7
+          inputs:
+            - name: test_gem
+          caches:
+            - path: test_gem/vendor/bundle
+          run:
+            path: sh
+            args:
+              - -xc
+              - |
+                bundle config path vendor/bundle
+                bundle install --jobs 4 --retry 3
+                bundle exec rake spec
+            dir: test_gem
+
+  - name: build
+    public: true
+    plan:
+      - get: test_gem
+        params:
+          depth: 1
+      - task: build
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ruby
+              tag: 2.7
+          inputs:
+            - name: test_gem
+          caches:
+            - path: test_gem/vendor/bundle
+          run:
+            path: sh
+            args:
+              - -xc
+              - |
+                bundle config path vendor/bundle
+                bundle install --jobs 4 --retry 3
+                bundle exec rake build
+            dir: test_gem
+          outputs:
+            - name: packages
+              path: test_gem/pkg
+      - put: artifacts
+        params:
+          file: packages/test_gem-*.gem
+          acl: public-read
