@@ -12,4 +12,9 @@ if [ ! -e .envrc ]; then
   cp .envrc.example .envrc
 fi
 
+if [ ! -e vault/scripts/secrets.json ]; then
+  echo "create vault secrets.json"
+  cp vault/scripts/secrets.json.example vault/scripts/secrets.json
+fi
+
 ./keys/generate

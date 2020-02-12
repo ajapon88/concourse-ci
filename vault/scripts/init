@@ -2,10 +2,20 @@
 
 cd $(dirname ${0})
 
+echo "> vault login"
 vault login "${VAULT_DEV_ROOT_TOKEN_ID}"
+
+echo "> vault policy write concourse"
 cat <<EOF | vault policy write concourse -
 path "concourse/*" {
   policy = "read"
 }
 EOF
+
+echo "> vault secrets enable"
 vault secrets enable -version=1 -path=concourse kv
+
+if [ -e ./secrets.json ]; then
+  echo "> vault write from secrets.json"
+  vault write concourse/main @secrets.json
+fi

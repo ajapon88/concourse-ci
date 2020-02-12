@@ -6,9 +6,9 @@ pid=$!
 
 if [ -n "${POST_COMMAND}" ]; then
   while [ -x /proc/$pid ]; do
-    #sleep 1
+    sleep 1
     set +e
-    vault status >/dev/null
+    vault status
     status=$?
     # 0: success
     # 1: error
