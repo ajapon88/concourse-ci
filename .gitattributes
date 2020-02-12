@@ -1,7 +1,7 @@
 *.sh eol=lf
 *.yml eol=lf
 *.yaml eol=lf
-.env eol=lf
-.envrc eol=lf
+.env.example eol=lf
+.envrc.example eol=lf
 Dockerfile eol=lf
 keys/generate eol=lf

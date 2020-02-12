@@ -1,0 +1,5 @@
+*.sh eol=lf
+*.hcl eol=lf
+Dockerfile eol=lf
+scripts/init eol=lf
+scripts/secrets.json.example eol=lf
