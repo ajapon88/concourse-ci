@@ -50,13 +50,16 @@ services:
       CONCOURSE_NAME: concourse-worker
 
   vault:
-    image: vault:1.3.2
+    build: ./vault
     command: server -dev
     cap_add:
       - IPC_LOCK
     ports:
       - 8200:8200
     volumes:
-      - ./vault/config_dev:/vault/config
+      - ./vault/config:/vault/config
+      - ./vault/scripts:/vault/scripts
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: ${CONCOURSE_VAULT_CLIENT_TOKEN}
+      VAULT_ADDR: http://127.0.0.1:8200
+      POST_COMMAND: /vault/scripts/init

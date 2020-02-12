@@ -1,0 +1,11 @@
+#!/bin/sh -eu
+
+cd $(dirname ${0})
+
+vault login "${VAULT_DEV_ROOT_TOKEN_ID}"
+cat <<EOF | vault policy write concourse -
+path "concourse/*" {
+  policy = "read"
+}
+EOF
+vault secrets enable -version=1 -path=concourse kv
