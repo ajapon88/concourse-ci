@@ -10,7 +10,7 @@ resources:
   check_every: 1m
   source:
     repository: ajapon88/test_gem
-    access_token: ((github-access-token))
+    access_token: ((github_access_token))
 
 jobs:
 - name: spec

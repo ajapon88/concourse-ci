@@ -10,8 +10,8 @@ resources:
       endpoint: http://minio:9000
       disable_ssl: true
       region_name: ap-northeast-1
-      access_key_id: ((minio-access-key))
-      secret_access_key: ((minio-secret-key))
+      access_key_id: ((minio_access_key))
+      secret_access_key: ((minio_secret_key))
       bucket: artifacts
       regexp: test_gem/test_gem-(.*).gem
 
