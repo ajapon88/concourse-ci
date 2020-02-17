@@ -1,0 +1,75 @@
+resources:
+  - name: version
+    type: semver
+    source:
+      driver: s3
+      initial_version: 0.0.1
+      endpoint: http://minio:9000
+      disable_ssl: true
+      access_key_id: ((minio_access_key))
+      secret_access_key: ((minio_secret_key))
+      bucket: version
+      region_name: ap-northeast-1
+      key: version
+
+jobs:
+  - name: display-version
+    plan:
+      - get: version
+      - task: display-version
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: busybox
+          inputs:
+            - name: version
+          run:
+            path: cat
+            args: [version/number]
+
+  - name: bump-major-version
+    plan:
+      - get: version
+        params:
+          bump: major
+      - put: version
+        params:
+          file: version/number
+
+  - name: bump-minor-version
+    plan:
+      - get: version
+        params:
+          bump: minor
+      - put: version
+        params:
+          file: version/number
+
+  - name: bump-patch-version
+    plan:
+      - get: version
+        params:
+          bump: patch
+      - put: version
+        params:
+          file: version/number
+
+  - name: bump-rc-version
+    plan:
+      - get: version
+        params:
+          pre: rc
+      - put: version
+        params:
+          file: version/number
+
+  - name: final-version
+    plan:
+      - get: version
+        params:
+          bump: final
+      - put: version
+        params:
+          file: version/number
