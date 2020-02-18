@@ -1,5 +1,5 @@
 resources:
-  - name: version
+  - name: semver
     type: semver
     source:
       driver: s3
@@ -8,14 +8,14 @@ resources:
       disable_ssl: true
       access_key_id: ((minio_access_key))
       secret_access_key: ((minio_secret_key))
-      bucket: version
+      bucket: semver
       region_name: ap-northeast-1
       key: version
 
 jobs:
   - name: display-version
     plan:
-      - get: version
+      - get: semver
       - task: display-version
         config:
           platform: linux
@@ -24,52 +24,52 @@ jobs:
             source:
               repository: busybox
           inputs:
-            - name: version
+            - name: semver
           run:
             path: cat
-            args: [version/number]
+            args: [semver/number]
 
   - name: bump-major-version
     plan:
-      - get: version
+      - get: semver
         params:
           bump: major
-      - put: version
+      - put: semver
         params:
-          file: version/number
+          file: semver/number
 
   - name: bump-minor-version
     plan:
-      - get: version
+      - get: semver
         params:
           bump: minor
-      - put: version
+      - put: semver
         params:
-          file: version/number
+          file: semver/number
 
   - name: bump-patch-version
     plan:
-      - get: version
+      - get: semver
         params:
           bump: patch
-      - put: version
+      - put: semver
         params:
-          file: version/number
+          file: semver/number
 
   - name: bump-rc-version
     plan:
-      - get: version
+      - get: semver
         params:
           pre: rc
-      - put: version
+      - put: semver
         params:
-          file: version/number
+          file: semver/number
 
-  - name: final-version
+  - name: bump-final-version
     plan:
-      - get: version
+      - get: semver
         params:
           bump: final
-      - put: version
+      - put: semver
         params:
-          file: version/number
+          file: semver/number
