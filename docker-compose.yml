@@ -75,3 +75,10 @@ services:
       MINIO_REGION: ${MINIO_REGION}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+
+  docker-registry:
+    image: registry:2.7.1
+    volumes:
+      - ./volumes/registry:/var/lib/registry
+    ports:
+      - 5000:5000

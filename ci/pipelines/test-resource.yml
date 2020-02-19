@@ -4,6 +4,12 @@ resource_types:
     source:
       repository: ajapon88/concourse-test-resource
 
+  - name: registry-test-resource
+    type: docker-image
+    source:
+      repository: docker-registry:5000/ajapon88/concourse-test-resource
+      insecure_registries: ["docker-registry:5000"]
+
 resources:
   - name: test-resource
     type: test-resource
@@ -11,13 +17,29 @@ resources:
       config1: config-value1
       config2: config-value2
 
+  - name: registry-test-resource
+    type: registry-test-resource
+    source:
+      config1: config-value1
+      config2: config-value2
+
 jobs:
-  - name: sample
+  - name: docker-hub
     plan:
       - get: test-resource
         # trigger: true
         params:
           get_param1: get-param-value1
       - put: test-resource
+        params:
+          put_param1: put-param-value1
+
+  - name: docker-registry
+    plan:
+      - get: registry-test-resource
+        # trigger: true
+        params:
+          get_param1: get-param-value1
+      - put: registry-test-resource
         params:
           put_param1: put-param-value1
