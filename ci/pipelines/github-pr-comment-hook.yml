@@ -1,0 +1,74 @@
+resource_types:
+  - name: pull-request-comment-hook
+    type: docker-image
+    source:
+      repository: ajapon88/concourse-github-pr-comment-hook-resource
+
+resources:
+  - name: test_gem
+    type: pull-request-comment-hook
+    check_every: 24h
+    source:
+      repository: ajapon88/test_gem
+      access_token: ((github_access_token))
+      trigger_phrase: "test this please"
+      allow_users:
+        - ajapon88
+
+jobs:
+  - name: spec
+    public: true
+    plan:
+      - get: test_gem
+        params:
+          depth: 1
+        trigger: true
+      - put: update-status
+        resource: test_gem
+        params:
+          path: test_gem
+          status: pending
+          context: spec
+        get_params:
+          skip_download: true
+      - task: spec
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ruby
+              tag: 2.7
+          inputs:
+            - name: test_gem
+          caches:
+            - path: test_gem/vendor/bundle
+          run:
+            path: sh
+            args:
+              - -xce
+              - |
+                bundle config path vendor/bundle
+                bundle install --jobs 4 --retry 3
+                bundle exec rake spec
+            dir: test_gem
+    on_success:
+      put: update-status
+      resource: test_gem
+      params:
+        path: test_gem
+        status: success
+        context: spec
+        comment: build succeeded!!
+      get_params:
+        skip_download: true
+    on_failure:
+      put: update-status
+      resource: test_gem
+      params:
+        path: test_gem
+        status: failure
+        context: spec
+        comment: build failed...
+      get_params:
+        skip_download: true
